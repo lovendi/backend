@@ -1,12 +1,14 @@
 import express from "express";
 import {
     generateInvoiceNumber,
-    createOrder
+    createOrder,
+    productList
 } from "../controllers/OrderController.js";
 
 const router = express.Router();
 
 router.get('/order/invoice-number', generateInvoiceNumber);
 router.post('/order/create', createOrder);
+router.get('/order/product-list', productList);
 
 export default router;

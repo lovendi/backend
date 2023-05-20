@@ -3,6 +3,7 @@ import moment from "moment/moment.js";
 import Order from "../models/OrderModel.js";
 import OrderDetail from "../models/OrderDetailModel.js";
 import Product from "../models/ProductModel.js"
+import { Op } from "sequelize";
 
 /**
  * API generate Invoice Number 
@@ -36,6 +37,7 @@ export const generateInvoiceNumber= async(req, res) =>{
   } catch (error) {
       await trx.rollback();
       console.log(error.message);
+      res.status(500).json({msg: error.message});
   }
 }
 
@@ -108,5 +110,31 @@ export const createOrder = async(req, res) =>{
   } catch (error) {
       await trx.rollback();
       console.log(error.message);
+      res.status(500).json({msg: error.message});
+  }
+}
+
+/**
+ * API generate Invoice Number 
+ * @param {*} trx 
+ * @returns 
+ */
+export const productList= async(req, res) =>{
+  try {
+    let data = await Product.findAll({
+      where: {
+        [Op.and]: [{
+          expired: {
+            [Op.gte]: new Date()
+          }
+        }]
+      },
+      attributes: [['kodeProduk', 'kdProduk'], 'namaProduk', 'qty', ['hargaJual','harga']]
+    })
+      
+    res.status(200).json({data: data});
+  } catch (error) {
+      console.log(error.message);
+      res.status(500).json({msg: error.message});
   }
 }
