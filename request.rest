@@ -1,0 +1,136 @@
+GET http://localhost:5000/products/expired
+
+###
+GET http://localhost:5000/products/outofstock
+
+###
+GET http://localhost:5000/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0LCJuYW1lIjoibG92IiwidXNlcm5hbWUiOiJsb3ZlbmRpaSIsImlhdCI6MTY4MzYwOTY5NywiZXhwIjoxNjgzNjA5NzE3fQ._AhBzz-q1NYxHfcvBNpkxz4jUMM9e4y8k2tMLwPKk2k
+
+
+###
+POST http://localhost:5000/products
+Content-Type: application/json
+
+{
+    "kodeProduk": "BRG0004",
+    "namaProduk": "Telur",
+    "categoryId": 4,
+    "qty": 0,
+    "expired": "2025-03-01",
+    "hargaBeli": "27000",
+    "hargaJual": "28000",
+    "satuan": "pcs"
+}
+
+###
+POST http://localhost:5000/products
+Content-Type: application/json
+
+{
+    "kodeProduk": "BRG0003",
+    "namaProduk": "Mie Sedap Goreng Korean Spicy",
+    "categoryId": 2,
+    "qty": 0,
+    "expired": "2025-03-01",
+    "hargaBeli": "2500",
+    "hargaJual": "3500",
+    "satuanId": 2,
+    "supplierId": 1
+}
+
+###
+POST http://localhost:5000/products
+Content-Type: application/json
+
+{
+    "kodeProduk": "BRG0005",
+    "namaProduk": "Mie Sedap Goreng Original",
+    "categoryId": 2,
+    "qty": 0,
+    "expired": "2025-03-01",
+    "hargaBeli": "2500",
+    "hargaJual": "3500",
+    "satuanId": 2,
+    "supplierId": 1
+}
+
+###
+POST http://localhost:5000/products
+Content-Type: application/json
+
+{
+    "kodeProduk": "BRG0001",
+    "namaProduk": "Sabun Lifebuoy Lemon",
+    "categoryId": 1,
+    "qty": 0,
+    "expired": "2025-03-01",
+    "hargaBeli": "2500",
+    "hargaJual": "3500",
+    "satuanId": 2,
+    "supplierId": 1
+}
+
+###
+POST http://localhost:5000/products
+Content-Type: application/json
+
+{
+    "kodeProduk": "BRG0004",
+    "namaProduk": "Telur",
+    "categoryId": 4,
+    "qty": 0,
+    "expired": "2025-03-01",
+    "hargaBeli": "27000",
+    "hargaJual": "28000",
+    "satuan": "pcs"
+}
+
+###
+POST http://localhost:5000/users/login
+Content-Type: application/json
+
+{
+    "name"  : "loven",
+    "username" : "lovendii",
+    "password" : "123456",
+    "confPassword" : "123456"
+}
+
+###
+POST http://localhost:5000/stocks
+Content-Type: application/json
+
+{
+    "qtyIn"  : 20,
+    "tglMasuk" : "2023-05-12",
+    "productKodeProduk" : "BRG0001",
+    "supplierId" : 1,
+    "unitId" : 1
+}
+
+###
+POST http://localhost:5000/categorys/create
+Content-Type: application/json
+
+{
+    "namaKategori": "Minyak"
+}
+
+###
+PATCH  http://localhost:5000/products/1
+Content-Type: application/json
+
+{
+    "kode_produk": "BRG0002",
+    "nama_produk": "Sabun Lifebuoy Anggur",
+    "kategori": "Sabun",
+    "stok": "100",
+    "expired": "2025-03-01",
+    "harga_beli": "2000",
+    "harga_jual": "3000",
+    "satuan": "pcs"
+}
+
+###
+DELETE http://localhost:5000/stocks/2
