@@ -7,6 +7,7 @@ import CategoryRoute  from "./routes/CategoryRoute.js";
 import UnitRoute  from "./routes/UnitRoute.js";
 import SupplierRoute  from "./routes/SupplierRoute.js";
 import StockRoute  from "./routes/StockRoute.js";
+import OrderRoute  from "./routes/OrderRoute.js";
 import UserRoute  from "./routes/UserRoute.js";
 import Product from "./models/ProductModel.js";
 import Category from "./models/CategoryModel.js";
@@ -47,6 +48,7 @@ app.use(CategoryRoute);
 app.use(UnitRoute);
 app.use(SupplierRoute);
 app.use(StockRoute);
+app.use(OrderRoute);
 app.use(UserRoute);
 
 app.listen(5000, ()=> console.log('Server up and running...'));
