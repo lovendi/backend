@@ -17,18 +17,18 @@ export const generateInvoiceNumber= async(req, res) =>{
     let timeNow = moment().format('YYMMDD')
     let tmpInvNo = await Order.findOne({ order: [[ 'invoiceNo', 'DESC' ]], limit: 1, transaction: trx })
     tmpInvNo = !tmpInvNo ? `${timeNow}00000` : tmpInvNo.invoiceNo
-    let ctxTime = tmpInvNo.slice(4,6)
-    let num = parseInt(tmpInvNo.slice(6))
+    let ctxTime = tmpInvNo.slice(7,9)
+    let num = parseInt(tmpInvNo.slice(9))
     let chkTimeNow = timeNow.slice(4,6)
     
     let invoiceNo = ''
     
     if (chkTimeNow !== ctxTime) {
       num = 1
-      invoiceNo = `${timeNow}${num.toString().padStart(5, '0')}`
+      invoiceNo = `INV${timeNow}${num.toString().padStart(5, '0')}`
     } else {
       num += 1
-      invoiceNo = `${timeNow}${num.toString().padStart(5, '0')}`
+      invoiceNo = `INV${timeNow}${num.toString().padStart(5, '0')}`
     }
 
     await trx.commit()
