@@ -57,7 +57,7 @@ export const login = async(req, res) => {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000
         });
-        res.json({ accessToken });
+        res.json({ accessToken, username });
     } catch (error) {
         res.status(404).json({msg:"username tidak ditemukan"});
     }
