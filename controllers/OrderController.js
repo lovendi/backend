@@ -121,13 +121,24 @@ export const createOrder = async(req, res) =>{
  */
 export const productList= async(req, res) =>{
   try {
+    let kdProduk = req.body.kdProduk || ''
+    let namaProduk = req.body.namaProduk || ''
     let data = await Product.findAll({
       where: {
-        [Op.and]: [{
-          expired: {
-            [Op.gte]: new Date()
+        expired: {
+          [Op.gte]: new Date()
+        },
+        [Op.or]: [
+          {
+            kodeProduk: {
+              [Op.iLike]: '%'+kdProduk+'%'
+            },
+          }, {
+            namaProduk: {
+              [Op.iLike]: '%'+namaProduk+'%'
+            }
           }
-        }]
+        ]
       },
       attributes: [['kodeProduk', 'kdProduk'], 'namaProduk', 'qty', ['hargaJual','harga']]
     })

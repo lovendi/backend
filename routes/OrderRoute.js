@@ -9,6 +9,6 @@ const router = express.Router();
 
 router.get('/order/invoice-number', generateInvoiceNumber);
 router.post('/order/create', createOrder);
-router.get('/order/product-list', productList);
+router.post('/order/product-list', productList);
 
 export default router;
