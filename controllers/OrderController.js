@@ -3,7 +3,7 @@ import moment from "moment/moment.js";
 import Order from "../models/OrderModel.js";
 import OrderDetail from "../models/OrderDetailModel.js";
 import Product from "../models/ProductModel.js"
-import { Op } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
 
 /**
  * API generate Invoice Number 
@@ -82,7 +82,8 @@ export const createOrder = async(req, res) =>{
         kdProduk: el.kdProduk,
         orderId: dataOrder.id,
         qty: el.qty,
-        harga: parseFloat(el.harga)
+        harga: parseFloat(el.harga),
+        hargaBeli: parseFloat(chkProduk.hargaBeli),
       }, {transaction: trx})
 
       await Product.update({ qty: (chkProduk['qty'] - el.qty) }, { where: { kodeProduk: el.kdProduk }, transaction: trx })
@@ -147,5 +148,128 @@ export const productList= async(req, res) =>{
   } catch (error) {
       console.log(error.message);
       res.status(500).json({msg: error.message});
+  }
+}
+
+export const orderList = async(req, res) =>{
+  try {
+    const page = parseInt(req.body.page) || 0;
+    const limit = parseInt(req.body.limit) || 10;
+    let date = req.body.search_date && req.body.search_date.length > 0 ? req.body.search_date : [moment().format('YYYY-MM-DD'), moment().add(7, 'days').format('YYYY-MM-DD')]
+    const offset = limit * page;
+    const totalRows = await Order.count({
+      where: {
+        createdAt: {
+          [Op.between]: [date[0], date[1]]
+        }
+      }
+    }); 
+    const totalPage = Math.ceil(totalRows / limit);
+    // Order.hasMany(OrderDetail, {foreignKey: 'orderId'})
+    // OrderDetail.belongsTo(Order, {foreignKey: 'orderId'})
+    // Product.hasMany(OrderDetail, {foreignKey: 'kdProduk'})
+    // OrderDetail.belongsTo(Product, {foreignKey: 'kdProduk'})
+    // const result = await Order.findAll({
+    //     attributes:[[db.literal('row_number() over (order by id)'), 'no'], 'invoiceNo', 'username', 'total',
+    //     ['createdAt','tgl_transaksi']],
+    //     include: [
+    //       {
+    //         model: OrderDetail,
+    //         include: [
+    //           {
+    //             model: Product
+    //           }
+    //         ]
+    //       }
+    //     ],
+    //     where: {
+    //       createdAt: {
+    //         [Op.between]: [date[0], date[1]]
+    //       }
+    //     },  
+    //     group: "id",
+    //     offset: offset,
+    //     limit: limit,
+    // });
+
+    const result = await db.query(`
+      SELECT
+      row_number() over (order by ord.id desc) AS no, ord."invoiceNo", ord.username, ord.total,
+      ord."createdAt" AS tgl_transaksi, array_agg(prd."namaProduk") AS produkList
+      FROM orders AS ord
+      LEFT JOIN "orderDetails" AS ords ON ords."orderId" = ord.id
+      LEFT JOIN product AS prd ON prd."kodeProduk" = ords."kdProduk"
+      WHERE ord."createdAt" between :startDate and :endDate
+      GROUP BY ord.id
+      ORDER BY ord.id desc
+      LIMIT :limit
+      OFFSET :offset
+    `, {
+      replacements: {
+        startDate: date[0],
+        endDate: date[1],
+        limit: limit,
+        offset: offset,
+      },
+      type: QueryTypes.SELECT
+    })
+    res.status(200).json({
+        result: result,
+        page: page,
+        limit: limit,
+        totalRows: totalRows,
+        totalPage: totalPage
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({msg: error.message});
+  }
+}
+
+export const getOmzet = async(req, res) =>{
+  try {
+    let date = req.body.search_date && req.body.search_date.length > 0 ? req.body.search_date : [moment().format('YYYY-MM-DD'), moment().add(7, 'days').format('YYYY-MM-DD')]
+
+    const result = await Order.findAll({
+        attributes:[[db.literal('sum(total)'), 'omzet']],
+        where: {
+          createdAt: {
+            [Op.between]: [date[0], date[1]]
+          }
+        }
+    });
+    let data = result[0]
+    res.status(200).json({
+        data
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({msg: error.message});
+  }
+}
+
+export const getProfit = async(req, res) =>{
+  try {
+    let date = req.body.search_date && req.body.search_date.length > 0 ? req.body.search_date : [moment().format('YYYY-MM-DD'), moment().add(7, 'days').format('YYYY-MM-DD')]
+
+    const result = await db.query(`
+      SELECT SUM((ords.harga - ords."hargaBeli")*qty) AS profit
+      FROM orders AS ord
+      LEFT JOIN "orderDetails" AS ords ON ords."orderId" = ord.id
+      WHERE ord."createdAt" between :startDate and :endDate
+    `, {
+      replacements: {
+        startDate: date[0],
+        endDate: date[1]
+      },
+      type: QueryTypes.SELECT
+    })
+    let data = result[0]
+    res.status(200).json({
+        data
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({msg: error.message});
   }
 }
