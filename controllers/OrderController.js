@@ -155,42 +155,15 @@ export const orderList = async(req, res) =>{
   try {
     const page = parseInt(req.body.page) || 0;
     const limit = parseInt(req.body.limit) || 10;
-    let date = req.body.search_date && req.body.search_date.length > 0 ? req.body.search_date : [moment().format('YYYY-MM-DD'), moment().add(7, 'days').format('YYYY-MM-DD')]
+    let date = req.body.search_date || []
     const offset = limit * page;
+
     const totalRows = await Order.count({
       where: {
-        createdAt: {
-          [Op.between]: [date[0], date[1]]
-        }
+        createdAt: date.length > 0 ? {[Op.between]: [date[0], date[1]]} : null
       }
     }); 
     const totalPage = Math.ceil(totalRows / limit);
-    // Order.hasMany(OrderDetail, {foreignKey: 'orderId'})
-    // OrderDetail.belongsTo(Order, {foreignKey: 'orderId'})
-    // Product.hasMany(OrderDetail, {foreignKey: 'kdProduk'})
-    // OrderDetail.belongsTo(Product, {foreignKey: 'kdProduk'})
-    // const result = await Order.findAll({
-    //     attributes:[[db.literal('row_number() over (order by id)'), 'no'], 'invoiceNo', 'username', 'total',
-    //     ['createdAt','tgl_transaksi']],
-    //     include: [
-    //       {
-    //         model: OrderDetail,
-    //         include: [
-    //           {
-    //             model: Product
-    //           }
-    //         ]
-    //       }
-    //     ],
-    //     where: {
-    //       createdAt: {
-    //         [Op.between]: [date[0], date[1]]
-    //       }
-    //     },  
-    //     group: "id",
-    //     offset: offset,
-    //     limit: limit,
-    // });
 
     const result = await db.query(`
       SELECT
@@ -199,15 +172,15 @@ export const orderList = async(req, res) =>{
       FROM orders AS ord
       LEFT JOIN "orderDetails" AS ords ON ords."orderId" = ord.id
       LEFT JOIN product AS prd ON prd."kodeProduk" = ords."kdProduk"
-      WHERE ord."createdAt" between :startDate and :endDate
+      WHERE CASE WHEN :startDate NOTNULL THEN ord."createdAt" between :startDate and :endDate ELSE TRUE END
       GROUP BY ord.id
       ORDER BY ord.id desc
       LIMIT :limit
       OFFSET :offset
     `, {
       replacements: {
-        startDate: date[0],
-        endDate: date[1],
+        startDate: date[0] || null,
+        endDate: date[1] || null,
         limit: limit,
         offset: offset,
       },
@@ -228,14 +201,14 @@ export const orderList = async(req, res) =>{
 
 export const getOmzet = async(req, res) =>{
   try {
-    let date = req.body.search_date && req.body.search_date.length > 0 ? req.body.search_date : [moment().format('YYYY-MM-DD'), moment().add(7, 'days').format('YYYY-MM-DD')]
+    let date = req.body.search_date || []
 
     const result = await Order.findAll({
         attributes:[[db.literal('sum(total)'), 'omzet']],
         where: {
-          createdAt: {
+          createdAt: date.length > 0 ? {
             [Op.between]: [date[0], date[1]]
-          }
+          } : null
         }
     });
     let data = result[0]
@@ -250,13 +223,13 @@ export const getOmzet = async(req, res) =>{
 
 export const getProfit = async(req, res) =>{
   try {
-    let date = req.body.search_date && req.body.search_date.length > 0 ? req.body.search_date : [moment().format('YYYY-MM-DD'), moment().add(7, 'days').format('YYYY-MM-DD')]
+    let date = req.body.search_date || null
 
     const result = await db.query(`
       SELECT SUM((ords.harga - ords."hargaBeli")*qty) AS profit
       FROM orders AS ord
       LEFT JOIN "orderDetails" AS ords ON ords."orderId" = ord.id
-      WHERE ord."createdAt" between :startDate and :endDate
+      WHERE CASE WHEN :startDate NOTNULL THEN ord."createdAt" between :startDate and :endDate ELSE TRUE END
     `, {
       replacements: {
         startDate: date[0],

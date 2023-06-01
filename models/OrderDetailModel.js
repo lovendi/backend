@@ -17,6 +17,8 @@ export const OrderDetail = db.define('orderDetails',{
         type:DataTypes.INTEGER
     },harga:{
         type:DataTypes.DECIMAL
+    },hargaBeli:{
+        type:DataTypes.DECIMAL
     }
     
 },{

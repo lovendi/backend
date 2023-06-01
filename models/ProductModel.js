@@ -12,8 +12,6 @@ export const Product = db.define('product',{
         type:DataTypes.STRING
     }, qty:{
         type:DataTypes.INTEGER
-    }, expired:{
-        type:DataTypes.DATEONLY
     }, hargaBeli:{
         type:DataTypes.INTEGER
     }, hargaJual:{
