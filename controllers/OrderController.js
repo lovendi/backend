@@ -126,9 +126,6 @@ export const productList= async(req, res) =>{
     let namaProduk = req.body.namaProduk || ''
     let data = await Product.findAll({
       where: {
-        expired: {
-          [Op.gte]: new Date()
-        },
         [Op.or]: [
           {
             kodeProduk: {
