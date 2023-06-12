@@ -1,5 +1,6 @@
 import db from "../config/Database.js";
 import Stock from "../models/StockModel.js";
+import StockHistory from "../models/StockHistoryModel.js";
 import Product from "../models/ProductModel.js"
 import Supplier from "../models/SupplierModel.js"
 import Unit from "../models/UnitModel"
@@ -90,6 +91,8 @@ export const createStock= async(req, res) =>{
             return res.status(400).json({msg: "Kode Produk tidak ditemukan!"})
         }
         await Stock.create(req.body, { transaction: trx });
+        
+        await StockHistory.create(req.body, { transaction: trx });
 
         await Product.update({ qty: (chkProduk['qty'] + qtyIn) }, { where: { kodeProduk: kdProduk }, transaction: trx })
 
